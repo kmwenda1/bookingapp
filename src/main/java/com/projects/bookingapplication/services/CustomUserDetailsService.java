@@ -1,7 +1,7 @@
 package com.projects.bookingapplication.services;
 
-
-
+import com.projects.bookingapplication.models.User;
+import com.projects.bookingapplication.security.CustomUserDetails;
 import com.projects.bookingapplication.repositories.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,8 +19,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        // You need a findByEmail method in UserRepository
-        return userRepository.findByEmail(email)
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+
+        return new CustomUserDetails(user);
     }
 }

@@ -1,11 +1,14 @@
 package com.projects.bookingapplication.util;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 
+import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.function.Function;
 
@@ -13,7 +16,8 @@ import java.util.function.Function;
 public class JwtUtil {
 
     // IMPORTANT: The secret key should be stored in application.properties in a real app
-    private final String SECRET = "SECRET123";
+    private static final String SECRET = "0778901234koomemwendabaraka0714914897";
+    private static final SecretKey secretKey = Keys.hmacShaKeyFor(SECRET.getBytes());
 
     // --- Token Generation ---
     public String generateToken(String username) {
@@ -49,9 +53,10 @@ public class JwtUtil {
 
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
-                .setSigningKey(SECRET)
-                .parseClaimsJws(token)
-                .getBody();
+                .verifyWith(secretKey) //
+                .build()
+                .parseSignedClaims(token) //
+                .getPayload();
     }
 
     private boolean isTokenExpired(String token) {

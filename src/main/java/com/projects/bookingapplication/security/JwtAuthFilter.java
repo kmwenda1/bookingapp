@@ -1,4 +1,4 @@
-package com.projects.bookingapplication.config;
+package com.projects.bookingapplication.security;
 
 
 import com.projects.bookingapplication.services.CustomUserDetailsService;

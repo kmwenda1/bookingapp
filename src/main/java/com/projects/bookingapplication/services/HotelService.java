@@ -101,4 +101,6 @@ public class HotelService {
         // Passed all checks for the entire stay duration
         return true;
     }
+
+
 }
