@@ -1,6 +1,6 @@
 package com.projects.bookingapplication.controllers;
 
-import com.projects.bookingapplication.dtos.SearchRequest;
+import com.projects.bookingapplication.dto.SearchRequest;
 import com.projects.bookingapplication.models.Hotel;
 import com.projects.bookingapplication.repositories.HotelRepository;
 import com.projects.bookingapplication.services.HotelService;

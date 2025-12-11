@@ -1,6 +1,6 @@
 package com.projects.bookingapplication.services;
 
-import com.projects.bookingapplication.dtos.SearchRequest; // Assuming you placed SearchRequest here
+import com.projects.bookingapplication.dto.SearchRequest; // Assuming you placed SearchRequest here
 import com.projects.bookingapplication.models.Hotel; // Assuming your Hotel model is here
 import com.projects.bookingapplication.models.Inventory; // Assuming your Inventory model is here
 import com.projects.bookingapplication.repositories.HotelRepository;

@@ -1,42 +1,50 @@
 package com.projects.bookingapplication.util;
 
-
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.function.Function;
 
 @Component
 public class JwtUtil {
 
-    // IMPORTANT: The secret key should be stored in application.properties in a real app
-    private static final String SECRET = "0778901234koomemwendabaraka0714914897";
-    private static final SecretKey secretKey = Keys.hmacShaKeyFor(SECRET.getBytes());
+    @Value("${jwt.secret:mySecretKeyForJWTTokenGenerationThatIsLongEnoughForHS256Algorithm}")
+    private String SECRET;
 
-    // --- Token Generation ---
+    @Value("${jwt.expiration:86400000}") // 24 hours in milliseconds
+    private Long expiration;
+
+    // Generate key properly for HS256
+    private SecretKey getSigningKey() {
+        byte[] keyBytes = SECRET.getBytes(StandardCharsets.UTF_8);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
     public String generateToken(String username) {
         return Jwts.builder()
-                .setSubject(username)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // 24 hours
-                .signWith(SignatureAlgorithm.HS256, SECRET)
+                .setSubject(username)  // ✅ Use setSubject instead of subject
+                .setIssuedAt(new Date())  // ✅ Use setIssuedAt instead of issuedAt
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))  // ✅ Use setExpiration
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)  // ✅ Use SignatureAlgorithm.HS256
                 .compact();
     }
 
-    // --- Token Validation ---
     public boolean validateToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        // The token is valid if the username matches the UserDetails username AND it's not expired.
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        try {
+            final String username = extractUsername(token);
+            return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        } catch (Exception e) {
+            return false;
+        }
     }
-
-    // --- Claim Extraction ---
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -52,11 +60,11 @@ public class JwtUtil {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(secretKey) //
+        return Jwts.parserBuilder()  // ✅ Use parserBuilder instead of parser
+                .setSigningKey(getSigningKey())  // ✅ Use setSigningKey
                 .build()
-                .parseSignedClaims(token) //
-                .getPayload();
+                .parseClaimsJws(token)  // ✅ Use parseClaimsJws
+                .getBody();  // ✅ Use getBody instead of getPayload
     }
 
     private boolean isTokenExpired(String token) {
